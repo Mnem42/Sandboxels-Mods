@@ -187,8 +187,9 @@
     cpan_speed;
     upan_speed;
     pan_keys;
-    show_floater;
     show_pos;
+    show_floater;
+    floater_scale;
     enable_scroll_zoom;
     scroll_zoom_multiplier;
     pan_zeroing_en;
@@ -243,6 +244,15 @@
         false,
         true,
         "Whether to show the floater or not",
+        validator
+      );
+      this.floater_scale = new Setting(
+        "Floater scale",
+        "floater_scale",
+        settingType.NUMBER,
+        false,
+        1,
+        "The floater scale",
         validator
       );
       this.show_pos = new Setting(
@@ -350,8 +360,9 @@
       settings_tab.registerSettings(
         void 0,
         this.canvas_bkg,
+        this.show_pos,
         this.show_floater,
-        this.show_pos
+        this.floater_scale
       );
       settings_tab.registerSettings(
         "Keybinds (requires reset)",
@@ -587,7 +598,7 @@
   var numlist_default = "#settingsMenu .zm_nml_btn_container button { font-size: 2em; padding: 0px; margin: 0px;}\r\n#settingsMenu .zm_nml_icontainer { align-self: center; flex-wrap: wrap; }\r\n#settingsMenu .zm_nml_setting { display: grid; grid-template-columns: 7em 1fr;}\r\n\r\n#settingsMenu .zm_nml_setting span {\r\n    input { width: 2.5em; margin-right: 4px; margin-bottom: 4px;}\r\n    \r\n    input:focus {\r\n        outline: none;\r\n        box-shadow: none;\r\n        border-color: white;\r\n    }\r\n}";
 
   // assets/main.css
-  var main_default = '#zm_data_div { margin-bottom: 10px }\r\n#canvasDiv   { overflow: hidden; background-color: var(--opac-85) }\r\n\r\n@media(pointer=coarse){\r\n    #zm_floater_container#zm_floater_container { \r\n        width: 40%;\r\n        height: auto;\r\n    }\r\n    #zm_floater_container:has(#zm_collapse[data-collapsed="true"]){\r\n        width: calc(40% / 3);\r\n    }\r\n}\r\n\r\n@media(pointer:coarse) and (orientation:landscape){\r\n    #zm_floater_container#zm_floater_container {\r\n        width: auto;\r\n        top: 5px;\r\n    }\r\n    #zm_floater_container:has(#zm_collapse[data-collapsed="true"]){\r\n        width: calc(40% / 3);\r\n    }\r\n}\r\n\r\n#colorSelector { z-index: 1; right: 5px }\r\n#zm_floater_container {\r\n    position: absolute;\r\n    display: grid;\r\n\r\n    right: 5px;\r\n    bottom: 5px;\r\n    height: 100px;\r\n    aspect-ratio: 1;\r\n\r\n    max-width: 200px;\r\n    max-height: 200px;\r\n\r\n    border: 2px solid white;\r\n    background-color: black;\r\n    font-size: 120%;\r\n\r\n    button { text-align: center; border: 0px solid white }\r\n\r\n    button:where([data-pos="tl"]) { border-width: 0px 2px 2px 0px };\r\n    button:where([data-pos="tr"]) { border-width: 2px 2px 0px 0px };\r\n    button:where([data-pos="bl"]) { border-width: 0px 0px 2px 2px };\r\n    button:where([data-pos="br"]) { border-width: 2px 0px 0px 2px };\r\n}\r\n#zm_floater_container:has(#zm_collapse[data-collapsed="true"]) {\r\n    height: 50px;\r\n    \r\n    button:not(#zm_collapse) { display: none; }\r\n}\r\n#canvasDiv:has(#colorSelector[style *= "block"]) #zm_floater_container {\r\n    bottom: 50px;\r\n}\r\n\r\n.zm_corner { border: 2px solid white; }\r\n\r\n#zm_collapse {\r\n    grid-row: 3;\r\n    grid-column: 3;\r\n}\r\n#zm_collapse[data-collapsed="true"] {\r\n    grid-row: 1;\r\n    grid-column: 1;\r\n    border-width: 0px;\r\n}';
+  var main_default = '#zm_data_div { margin-bottom: 10px }\r\n#canvasDiv   { overflow: hidden; background-color: var(--opac-85) }\r\n\r\n@media(pointer=coarse){\r\n    #zm_floater_container#zm_floater_container { \r\n        width: calc(40% * var(--zm-floater-scale));\r\n        height: auto;\r\n    }\r\n    #zm_floater_container:has(#zm_collapse[data-collapsed="true"]){\r\n        width: calc(40% / 3 * var(--zm-floater-scale));\r\n    }\r\n}\r\n\r\n@media(pointer:coarse) and (orientation:landscape){\r\n    #zm_floater_container#zm_floater_container {\r\n        width: auto;\r\n        top: 5px;\r\n    }\r\n    #zm_floater_container:has(#zm_collapse[data-collapsed="true"]){\r\n        width: calc(40% / 3 * var(--zm-floater-scale));\r\n    }\r\n}\r\n\r\n@media not (pointer: coarse){\r\n    #zm_floater_container:has(#zm_collapse[data-collapsed="true"]) {\r\n        width: calc(33px * var(--zm-floater-scale));\r\n    }\r\n}\r\n\r\n#zm_floater_container:has(#zm_collapse[data-collapsed="true"]) {\r\n    width: calc(33px * var(--zm-floater-scale));\r\n\r\n    button:not(#zm_collapse) { display: none; }\r\n}\r\n\r\n#colorSelector { z-index: 1; right: 5px }\r\n#zm_floater_container {\r\n    position: absolute;\r\n    display: grid;\r\n\r\n    right: 5px;\r\n    bottom: 5px;\r\n\r\n    width: calc(100px * var(--zm-floater-scale));\r\n    max-width:  calc(200px * var(--zm-floater-scale));\r\n    max-height: calc(200px * var(--zm-floater-scale));\r\n    aspect-ratio: 1;\r\n\r\n    border: 2px solid white;\r\n    background-color: black;\r\n    font-size: calc(120% * var(--zm-floater-scale));\r\n\r\n    button { text-align: center; border: 0px solid white }\r\n\r\n    button:where([data-pos="tl"]) { border-width: 0px 2px 2px 0px };\r\n    button:where([data-pos="tr"]) { border-width: 2px 2px 0px 0px };\r\n    button:where([data-pos="bl"]) { border-width: 0px 0px 2px 2px };\r\n    button:where([data-pos="br"]) { border-width: 2px 0px 0px 2px };\r\n}\r\n\r\n#canvasDiv:has(#colorSelector[style *= "block"]) #zm_floater_container {\r\n    bottom: 50px;\r\n}\r\n\r\n.zm_corner { border: 2px solid white; }\r\n\r\n#zm_collapse {\r\n    grid-row: 3;\r\n    grid-column: 3;\r\n}\r\n\r\n#zm_collapse[data-collapsed="true"] {\r\n    grid-row: 1;\r\n    grid-column: 1;\r\n    aspect-ratio: 1;\r\n    border-width: 0px;\r\n}';
 
   // assets/multisetting.css
   var multisetting_default = '.zm_ms_row {\r\n    display: grid;\r\n    grid-template-columns: 2.2em 1fr;    \r\n}\r\n\r\n.zm_ms_row[data-current="false"] {\r\n    .zm_ms_selbtn { color: transparent }\r\n}\r\n\r\n.zm_ms_selbtn.zm_ms_selbtn:not(#_) {\r\n    align-items: center;\r\n    justify-content: center;\r\n    height: 100%;\r\n    width: calc(100% - 10px);\r\n\r\n    margin-right: 2px;\r\n    padding: 0px;\r\n\r\n    border: 2px solid var(--theme);\r\n    font-size: 1.5em\r\n}';
@@ -653,6 +664,10 @@
       this.floater_div.style.display = this.settings.show_floater.value ? "grid" : "none";
       this.zoom_data_div.style.display = this.settings.show_pos.value ? "block" : "none";
       this.canvas_div.style.backgroundColor = this.settings.canvas_bkg.value ?? "#252525";
+      document.documentElement.style.setProperty(
+        "--zm-floater-scale",
+        this.settings.floater_scale.value.toString()
+      );
     }
   };
 
