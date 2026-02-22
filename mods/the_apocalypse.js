@@ -35,10 +35,10 @@ elements.zombie = {
 		"plasma": { attr1:{panic:5} },
 		"cold_fire": { attr1:{panic:5} },
 		"electric": { attr1:{panic:5} },
-		"blood": { attr1:{panic:-1} },
-		"infection":{ attr1:{panic:-2} },
+		"blood": { attr1:{panic:1} },
+		"infection":{ attr1:{panic:2} },
 		"cancer": { attr1:{panic:3} },
-		"plague": { attr1:{panic:0} },
+		"plague": { attr1:{panic:5} },
 		"radiation": { attr1:{panic:5} },
 		"tnt": { attr1:{panic:5} },
 		"dynamite": { attr1:{panic:5} },
@@ -56,7 +56,7 @@ elements.zombie = {
 elements.rotten_body = {
 	color: ["#8b803d","#b8b165","#b89765"],
 	behavior: [
-		"XX|CR:plague,stench,fly%0.25 AND CH:meat>rotten_meat|XX",
+		"XX|CR:infectious_plague,stench,fly%0.25 AND CH:meat>rotten_meat|XX",
 		"SP%99 AND CH:meat>rotten_meat%1|XX|SP%99 AND CH:meat>rotten_meat%1",
 		"XX|XX|XX"
 	],
@@ -102,7 +102,13 @@ elements.rotten_body = {
 		"sugar_water": { elem2:"dirty_water", chance:0.2 },
 		"salt_water": { elem2:"dirty_water", chance:0.2},
 		"cheese": { elem2:"rotten_cheese", chance:0.2 },
-		"body": { attr2:{panic:20} }
+		"body": { attr2:{"panic":20} },
+		"blood":{ attr1:{"panic":0} },
+		"infection":{ attr1:{"panic":0} },
+		"plague":{ attr1:{"panic":0} },
+		"head": { elem2:null },
+		"infected_body":{ attr2:{"panic":20} },
+		"infectious_plague":{ attr1:{"panic":0} }
 	},
 	properties: {
 		dead: false,
@@ -233,13 +239,13 @@ elements.rotten_body = {
 elements.rotten_head = {
 	color: ["#8b803d","#b8b165","#b89765"],
 	behavior: [
-		"XX|CR:plague,stench,fly%0.25 AND CH:meat>rotten_meat%1|XX",
+		"XX|CR:infectious_plague,stench,fly%0.25 AND CH:meat>rotten_meat%1|XX",
 		"SP%99 AND CH:meat>rotten_meat%1|XX|SP%99 AND CH:meat>rotten_meat%1",
 		"XX|XX|XX"
 	],
 	category: "apocalypse",
 	hidden: true,
-	density: 1005,
+	density: 1500,
 	state: "solid",
 	conduct: .05,
 	temp: 37,
@@ -268,9 +274,8 @@ elements.rotten_head = {
 		"alcohol": { chance:0.2, attr1:{"panic":0} },
 		"anesthesia": { attr1:{"panic":0} },
 		"alcohol_gas": { chance:0.2, attr1:{"panic":0} },
-		"head": { elem2:["meat","bone","blood"], chance:0.1 },
-		"meat": { elem2:null, chance:0.2, func:behaviors.FEEDPIXEL },
-		"blood": { elem2:null, chance:0.1 },
+		"meat": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
+		"blood": { elem2:null, chance:0.2 },
 		"dirty_water":{ elem2:"bubble", attr2:{"clone":"dirty_water"}, chance:0.001 },
 		"dead_rat":{ elem2:null, chance:0.1, func:behaviors.FEEDPIXEL }
 	},
@@ -347,109 +352,68 @@ elements.rotten_head = {
 	}
 },
 elements.necromancy = {
-	color:"#e4baee",
+	color:["#e4baee","#d48de6","#e787e2"],
 	tool: function(pixel) {
-		if (["rotten_meat", "soul"].includes(pixel.element)) {
-			changePixel(pixel,"zombie");
+		if (elements.necromancy.ignore.indexOf(pixel.element) !== -1) { return; }
+		if (pixel.burning && !elements[pixel.element].burning) {
+			delete pixel.burning;
+			delete pixel.burnStart;
 		}
-		if (["dead_rat"].includes(pixel.element)) {
-			changePixel(pixel,"zombified_rat");
+		if (!elements[pixel.element].insulate) {
+			if (pixel.temp > 100) {
+				pixel.temp = (pixel.temp+100)/2;
+				pixelTempCheck(pixel);
+				if (pixel.del) {return}
+			}
+			if (pixel.temp < -200) {
+				pixel.temp = (pixel.temp-200)/2;
+				pixelTempCheck(pixel);
+				if (pixel.del) {return}
+			}
+		}
+		if (pixel.origColor) {
+			pixel.color = "rgb("+pixel.origColor.join(",")+")";
+			delete pixel.origColor;
+		}
+		if (pixel.charge) {
+			delete pixel.charge;
+			pixel.chargeCD = 16;
+		}
+		if (elements.necromancy.reactions[pixel.element] && Math.random()<0.25) {
+			var r = elements.necromancy.reactions[pixel.element];
+			var elem2 = r.elem2;
+			if (elem2 !== undefined) {
+				if (Array.isArray(elem2)) {elem2 = elem2[Math.floor(Math.random()*elem2.length)]; }
+				if (elem2 === null) { deletePixel(pixel.x,pixel.y) }
+				else { changePixel(pixel, elem2); }
+			}
+			if (r.func) { r.func(pixel,pixel) }
+			if (r.color2) { pixel.color = pixelColorPick(pixel,r.color2) }
+		}
+		if (["rotten_meat"].includes(pixel.element)){
+			changePixel(pixel,"zombie")
+			if (["dead_rat"].includes(pixel.element)){
+				changePixel(pixel,"zombified_rat")
+			}
 		}
 	},
-	category: "apocalypse"
-}
-elements.rat = {
-	color: ["#a698a9","#8c7d82","#ccc3cf"],
+	ignore: ["sun"],
 	behavior: [
-		"XX|M2%1.5|M2%5",
-		"XX|FX%2 AND RL:plague%0.05|M2 AND BO",
-		"XX|M1|M2"
+		"M2|M1|M2",
+		"M1|DL%25|M1",
+		"M2|M1|M2"
 	],
 	reactions: {
-		"oxygen": { elem2:"carbon_dioxide", chance:0.5 },
-		"meat": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"cooked_meat": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"cured_meat": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"cheese": { elem2:null, chance:0.2, func:behaviors.FEEDPIXEL },
-		"cheese_powder": { elem2:null, chance:0.2, func:behaviors.FEEDPIXEL },
-		"rotten_cheese": { elem2:null, chance:0.2, func:behaviors.FEEDPIXEL },
-		"melted_cheese": { elem2:null, chance:0.3, func:behaviors.FEEDPIXEL },
-		"tomato": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"sauce": { elem2:null, chance:0.3, func:behaviors.FEEDPIXEL },
-		"plant": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"vine": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"evergreen": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"algae": { elem2:null, chance:0.2, func:behaviors.FEEDPIXEL },
-		"grass_seed": { elem2:null, chance:0.3 , func:behaviors.FEEDPIXEL},
-		"wheat_seed": { elem2:null, chance:0.3, func:behaviors.FEEDPIXEL },
-		"wheat": { elem2:null, chance:0.2, func:behaviors.FEEDPIXEL },
-		"potato_seed": { elem2:null, chance:0.3, func:behaviors.FEEDPIXEL },
-		"potato": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"corn_seed": { elem2:null, chance:0.3, func:behaviors.FEEDPIXEL },
-		"corn": { elem2:null, chance:0.1 , func:behaviors.FEEDPIXEL},
-		"lichen": { elem2:null, chance:0.04, func:behaviors.FEEDPIXEL },
-		"flower_seed": { elem2:null, chance:0.4 , func:behaviors.FEEDPIXEL},
-		"flour": { elem2:null, chance:0.1 , func:behaviors.FEEDPIXEL},
-		"dough": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"bread": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"toast": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"gingerbread": { elem2:null, chance:0.15, func:behaviors.FEEDPIXEL },
-		"rice": { elem2:null, chance:0.1 , func:behaviors.FEEDPIXEL},
-		"yogurt": { elem2:null, chance:0.15, func:behaviors.FEEDPIXEL },
-		"beans": { elem2:null, chance:0.15, func:behaviors.FEEDPIXEL },
-		"salt": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"sugar": { elem2:null, chance:0.2, func:behaviors.FEEDPIXEL },
-		"crumb": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"herb": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"salt_water": { elem2:"dirty_water", chance:0.2 },
-		"sugar_water": { elem2:"dirty_water", chance:0.2 },
-		"water": { elem2:"dirty_water", chance:0.2 },
-		"popcorn": { elem2:null, chance:0.3, func:behaviors.FEEDPIXEL },
-		"candy": { elem2:null, chance:0.3, func:behaviors.FEEDPIXEL },
-		"caramel": { elem2:null, chance:0.4, func:behaviors.FEEDPIXEL },
-		"lichen": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"egg": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"yolk": { elem2:null, chance:0.2, func:behaviors.FEEDPIXEL },
-		"hard_yolk": { elem2:null, chance:0.15, func:behaviors.FEEDPIXEL },
-		"eggnog": { elem2:null, chance:0.2, func:behaviors.FEEDPIXEL },
-		"milk": { elem2:null, chance:0.2, func:behaviors.FEEDPIXEL },
-		"grape": { elem2:null, chance:0.25, func:behaviors.FEEDPIXEL },
-		"batter": { elem2:null, chance:0.25, func:behaviors.FEEDPIXEL },
-		"baked_batter": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"butter": { elem2:null, chance:0.2, func:behaviors.FEEDPIXEL },
-		"melted_butter": { elem2:null, chance:0.3, func:behaviors.FEEDPIXEL },
-		"lettuce": { elem2:null, chance:0.2, func:behaviors.FEEDPIXEL },
-		"baked_potato": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"ice_cream": { elem2:null, chance:0.2, func:behaviors.FEEDPIXEL },
-		"cream": { elem2:null, chance:0.3, func:behaviors.FEEDPIXEL },
-		"pumpkin": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"pumpkin_seed": { elem2:null, chance:0.2, func:behaviors.FEEDPIXEL },
-		"coffee_bean": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"coffee_ground": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"nut": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"nut_meat": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"nut_butter": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"jelly": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"worm": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"ant": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"spider": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL },
-		"frog": { elem2:null, chance:0.005, func:behaviors.FEEDPIXEL },
-		"snail": { elem2:"limestone", chance:0.1, func:behaviors.FEEDPIXEL },
-		"slug": { elem2:null, chance:0.1, func:behaviors.FEEDPIXEL }
+		"rotten_meat": { elem2:"zombie" },
+		"dead_rat": { elem2:"zombified_rat" }
+
 	},
-	egg: "rat",
-	category: "life",
-	temp: 37.6,
-	tempHigh: 120,
-	stateHigh: "dead_rat",
-	tempLow: -18,
-	stateLow: "frozen_meat",
-	breakInto: ["infection","dead_rat"],
-	burn:80,
-	burnTime:150,
-	state: "solid",
-	density: 1450,
-	conduct: 0.25
+	temp:20,
+	state: "gas",
+	canPlace: true,
+	category: "apocalypse",
+	stain: 0.1,
+	buttonGlow: "#f2cafc"
 },
 elements.dead_rat = {
 	color: ["#afa587","#a28a74","#c0b88d","#c0a88d"],
@@ -482,7 +446,7 @@ elements.dead_rat = {
 elements.zombified_rat = {
 	color: ["#afa587","#a28a74","#c0b88d","#c0a88d"],
 	behavior: [
-		"ST:head|CR:plague,stench,stench,stench,fly%0.25 AND CH:meat>rotten_meat%1 AND M2%1.5 AND SW:head|M2%5 AND ST:head",
+		"SW:body|CR:plague,stench,stench,stench,fly%0.25 AND CH:meat>rotten_meat%1 AND M2%1.5 AND SW:head|M2%5 AND SW:body",
 		"SP%99 AND CH:meat>rotten_meat%1|SW:head|SP%99 AND CH:meat>rotten_meat%1 AND M2 AND BO",
 		"XX|M1 AND CH:meat>rotten_meat%1 AND SW:head|M2"
 	],
@@ -499,7 +463,8 @@ elements.zombified_rat = {
 		"wood":{ elem2:"sawdust", chance:0.2 },
 		"sawdust":{ elem2:null, chance:0.2 },
 		"brick":{ elem2:"brick_rubble", chance:0.5 },
-		"brick_rubble":{ elem2:null, chance:0.5 }
+		"brick_rubble":{ elem2:null, chance:0.5 },
+		"body":{ attr2:{"panic":20}, oneway:true }
 		
 	},
 	temp:37.6,
@@ -881,3 +846,19 @@ elements.infected_head = {
 		}
 	}
 }
+elements.infectious_plague.reactions.infected_body = { elem2:"rotten_body", chance:0.1 }
+elements.infectious_plague.reactions.infected_head = { elem2:"rotten_head", chance:0.1 }
+elements.rat.breakInto = ["infection","dead_rat"];
+elements.rat.stateHigh = "dead_rat";
+elements.water.rotten_body = { elem1:"dirty_water", chance:0.005 }
+elements.water.rotten_head = { elem1: "dirty_water", chance:0.005 }
+elements.water.infectious_plague = { elem1: "dirty_water", elem2:null  }
+elements.salt_water.rotten_body = { elem1: "dirty_water", chance:0.005 }
+elements.salt_water.rotten_head = { elem1: "dirty_water", chance:0.005 }
+elements.salt_water.infectious_plague = { elem1: "dirty_water", elem2:null }
+elements.sugar_water.rotten_body = { elem1: "dirty_water", chance:0.005 }
+elements.sugar_water.rotten_head = { elem1: "dirty_water", chance:0.005 }
+elements.sugar_water.infectious_plague = { elem1: "dirty_water", elem2:null }
+elements.seltzer.rotten_body = { elem1:"dirty_water", chance:0.005 }
+elements.seltzer.rotten_head = { elem1:"dirty_water", chance:0.005 }
+elements.seltzer.infectious_plague = { elem1: "dirty_water", elem2: null }
