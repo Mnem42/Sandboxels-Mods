@@ -1185,6 +1185,19 @@ img {
     padding-top: 0.1em;
     padding-bottom: 0.1em;
 }
+
+.standalone .offline-tab {
+  display: none;
+}
+.standalone .site-logo-link {
+  display: none;
+}
+
+#gameInfo {
+  color: yellow;
+  padding-right: 1em;
+  display: none;
+}
 `
 
 function shove_up(elem, count) {
