@@ -190,8 +190,6 @@
     show_pos;
     show_floater;
     floater_scale;
-    enable_scroll_zoom;
-    scroll_zoom_multiplier;
     pan_zeroing_en;
     zoom_zeroing_en;
     constructor(on_edit) {
@@ -275,24 +273,6 @@
         false,
         "wasd"
       );
-      this.enable_scroll_zoom = new Setting(
-        "Use shift+scroll for zoom",
-        "enable_scroll_zoom",
-        settingType.BOOLEAN,
-        false,
-        true,
-        "Whether to use shift+scroll for zooming or not",
-        validator
-      );
-      this.scroll_zoom_multiplier = new Setting(
-        "Scroll zoom multiplier",
-        "scroll_zoom_mul",
-        settingType.NUMBER,
-        false,
-        1,
-        "Multiplier for scroll zoom speed",
-        validator
-      );
       this.pan_zeroing_en = new Setting(
         "Enable pan zeroing",
         "en_pzero",
@@ -322,7 +302,25 @@
         }
       );
       this.unl_zoom = new SettingGroup({
-        speed: new Setting(
+        mouse_speed: new Setting(
+          "Scroll zoom speed",
+          "scroll_zoom_speed",
+          settingType.NUMBER,
+          false,
+          1,
+          "Speed for zooming with the scroll wheel",
+          validator
+        ),
+        invert_scroll: new Setting(
+          "Invert scroll",
+          "invert_scroll",
+          settingType.BOOLEAN,
+          false,
+          false,
+          "Whether to invert scroll or not",
+          validator
+        ),
+        kbd_speed: new Setting(
           "Zoom speed",
           "unl_zoom_speed",
           settingType.NUMBER,
@@ -371,11 +369,6 @@
         this.zoom_zeroing_en
       );
       settings_tab.registerSettings(
-        "Mouse",
-        this.enable_scroll_zoom,
-        this.scroll_zoom_multiplier
-      );
-      settings_tab.registerSettings(
         "Zoom",
         this.zoom
       );
@@ -416,19 +409,11 @@
         y = Math.floor(y / canvas2.clientHeight * (height + 1));
         return { x, y };
       };
-      window.wheelHandle = (e) => {
+      const wheel_handler = (e) => {
         e.preventDefault();
         if (e.shiftKey) {
-          const mul = this.settings.scroll_zoom_multiplier.value;
-          let new_level;
-          if (this.settings.zoom.value == 0) {
-            const zoom_level_count = this.settings.zoom.settings[0].value.length;
-            new_level = this.zoom_level + Math.round(e.deltaY * mul / 5);
-            new_level = Math.min(new_level, zoom_level_count - 1);
-            new_level = Math.max(new_level, 0);
-          } else {
-            new_level = this.zoom_level + e.deltaY * mul / 1e3;
-          }
+          const speed = this.settings.unl_zoom.settings.mouse_speed.value * (this.settings.unl_zoom.settings.invert_scroll.value ? -1 : 1);
+          const new_level = this.zoom_level + e.deltaY * speed / 1e3;
           const max = this.settings.unl_zoom.settings.max.value;
           const min = this.settings.unl_zoom.settings.min.value;
           if (new_level > max) {
@@ -441,28 +426,11 @@
           this.update();
           return;
         }
-        if ((/* @__PURE__ */ new Date()).getTime() - lastScroll < 25) {
-          return;
-        }
-        lastScroll = (/* @__PURE__ */ new Date()).getTime();
-        var deltaY = e.deltaY;
-        if (window.settings.invertscroll) {
-          if (deltaY > 0) {
-            deltaY = 1;
-          } else {
-            deltaY = -1;
-          }
-        } else {
-          if (deltaY < 0) {
-            deltaY = 1;
-          } else {
-            deltaY = -1;
-          }
-        }
-        mouseSize += Math.round(deltaY);
-        checkMouseSize(Math.sign(deltaY));
       };
-      this.patcher.canvas_div.addEventListener("wheel", wheelHandle);
+      if (this.settings.zoom.value === 1) {
+        window.wheelHandle = wheel_handler;
+        this.patcher.canvas_div.addEventListener("wheel", wheel_handler);
+      }
       runAfterReset(() => {
         this.zoom_level = 1;
         this.zoom_panning = [0, 0];
@@ -487,7 +455,7 @@
         }
       } else {
         const settings = this.settings.zoom.settings[1].settings;
-        const speed = settings.speed.value;
+        const speed = settings.kbd_speed.value;
         const min = settings.min.value;
         const max = settings.max.value;
         switch (direction) {
@@ -673,12 +641,12 @@
 
   // src/main.ts
   dependOn("betterSettings.js", () => {
-    let on_change = { cb: () => {
+    const on_change = { cb: () => {
     } };
     const settings_manager = new CustomSettingsManager(on_change);
     runAfterLoad(() => {
       const patcher = new Patcher(settings_manager);
-      const handler = new Handler(settings_manager, patcher);
+      new Handler(settings_manager, patcher);
       on_change.cb = () => patcher.update_from_settings();
     });
   }, true);
