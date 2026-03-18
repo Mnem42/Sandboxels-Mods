@@ -696,7 +696,7 @@ elements.destroyable_e_pipe = {
 elements.channel_pipe = {
     color: "#414c4f",
     onSelect: async function() {
-        let currentChannel = await _nousersthingsprompt("Please input the desired channel of this pipe strand. Warning: It wont work if you do multiple strand types while paused.", (currentChannel||undefined))
+        let currentChannel = await _nousersthingsprompt("Please input the desired channel of this pipe strand. Warning: It wont work if you do multiple strand types while paused.", undefined)
 		logMessage("Draw a pipe, wait for walls to appear, then erase the exit hole. Channel pipes only give pixels to channel pipes with the same channel.");
         currentElementProp = {channel: currentChannel}
     },
