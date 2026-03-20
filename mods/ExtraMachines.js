@@ -2025,7 +2025,7 @@ elements.Missile_Up = {
     
         for (let i = 0; i < 7; i++) {
             if (upOrDown == true) {
-                if (!isEmpty(x, y - i)) {
+                if (!isEmpty(x, y - i, true)) {
                     var sensed = pixelMap[x][pixel.y - i];
                     if (!(sensed.element == pixel.element)) {
                         // if (sensed.element.category === "solids") {
@@ -2034,7 +2034,7 @@ elements.Missile_Up = {
                     }
                 }
             } else if (upOrDown == false) {
-                if (!isEmpty(x, y + i)) {
+                if (!isEmpty(x, y + i, true)) {
                     var sensed = pixelMap[x][pixel.y + i];
                     if (!(sensed.element == pixel.element)) {
                         // if (sensed.element.category === "solids") {
@@ -2053,7 +2053,7 @@ elements.Missile_Up = {
     
         for (let i = 0; i < 7; i++) {
             if (BringupOrDown == true) {
-                if (!isEmpty(x, y - i)) {
+                if (!isEmpty(x, y - i,true)) {
                     var sensed = pixelMap[x][pixel.y - i];
                     if (!(sensed.element == pixel.element)) {
                         // if (sensed.element.category === "solids") {
@@ -2062,7 +2062,7 @@ elements.Missile_Up = {
                     }
                 }
             } else if (BringupOrDown == false) {
-                if (!isEmpty(x, y + i)) {
+                if (!isEmpty(x, y + i,true)) {
                     var sensed = pixelMap[x][pixel.y + i];
                     if (!(sensed.element == pixel.element)) {
                         // if (sensed.element.category === "solids") {
