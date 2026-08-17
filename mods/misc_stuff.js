@@ -244,3 +244,30 @@ elements.batter.reactions["yeast"] = {
     elem1: "sourdough_starter",
     elem2: null
 };
+
+elements.cinnamon_milk = {
+    color: "#c1a089",
+    behavior: behaviors.LIQUID,
+    category: "food",
+    state: "liquid",
+    density: 1050,
+    viscosity: 10
+};
+
+elements.cinnamon = {
+    color: "#82431f",
+    behavior: behaviors.POWDER,
+    category: "food",
+    state: "powder",
+    density: 550
+};
+
+elements.cinnamon_stick = {
+    color: "#733818",
+    behavior: behaviors.STURDYPOWDER,
+    category: "food",
+    state: "powder",
+    density: 550
+
+    breakInto: "cinnamon"
+};
