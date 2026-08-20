@@ -1,4 +1,4 @@
-alert("This is a developer alert. This is not an error message. If you see this, everything is running just fine! Hope you enjoy this mod!");
+//alert("This is a developer alert. This is not an error message. If you see this, everything is running just fine! Hope you enjoy this mod!");
 
 elements.stopper_fluid = {
     color: "#ffbb00",
