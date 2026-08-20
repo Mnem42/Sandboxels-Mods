@@ -1,8 +1,16 @@
+let canStick = function(pixel, x, y) {
+    let element = pixel.element
+
+    if (!canMove(pixel, x, y) && getPixel(x, y).element !== element) {
+        return true
+    }
+}
+
 behaviors.GEL = function(pixel) {
     let x = pixel.x
     let y = pixel.y
 
-    if (canMove(pixel, x-1, y) && canMove(pixel, x+1, y)) {
+    if (!canStick(pixel, x-1, y) && !canStick(pixel, x+1, y)) {
         tryMove(pixel, x, y+1)
     }
 
