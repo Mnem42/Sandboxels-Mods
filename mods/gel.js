@@ -10,8 +10,15 @@ behaviors.GEL = function(pixel) {
     let x = pixel.x
     let y = pixel.y
 
-    if (!canStick(pixel, x-1, y) && !canStick(pixel, x+1, y)) {
-        tryMove(pixel, x, y+1)
+    if (!canStick(pixel, x-1, y) && !canStick(pixel, x+1, y) && !canStick(pixel, x, y-1)) {
+        if (!tryMove(pixel, x, y+1) && Math.random() > 0.5) {
+            if (Math.random() > 0.5) {
+                tryMove(pixel, x-1, y+1)
+            } else {
+                tryMove(pixel, x+1, y+1)
+            }
+            
+        }
     }
 
     doDefaults(pixel)
