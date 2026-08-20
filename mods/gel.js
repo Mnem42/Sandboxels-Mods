@@ -20,12 +20,13 @@ let tryStick = function(pixel) {
         y2 = y + offset[1]
 
         if (getPixel(x2, y2) && !canMove(pixel, x2, y2)) {
-            let state = elements[getPixel(x2, y2).element].state
-            if (state === "liquid" || state === "gas") {
-                continue
-            }
             if (getPixel(x2, y2).element !== element) {
-                sticky = maxSticky
+                let state = elements[getPixel(x2, y2).element].state
+                if (state === "liquid" || state === "gas") {
+                    continue
+                } else {
+                    sticky = maxSticky
+                }
             } else if (getPixel(x2, y2).sticky && getPixel(x2, y2).sticky - 1 > sticky) {
                 sticky = getPixel(x2, y2).sticky - 1
             }
