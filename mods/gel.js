@@ -20,7 +20,7 @@ let tryStick = function(pixel) {
         y2 = offset[1]
 
         if (!canMove(pixel, x2, y2)) {
-            if (getPixel(x2, y2).element && getPixel(x2, y2).element !== element) {
+            if (getPixel(x2, y2) && getPixel(x2, y2).element !== element) {
                 sticky = maxSticky
             } else if (getPixel(x2, y2).sticky && getPixel(x2, y2).sticky - 1 > sticky) {
                 sticky = getPixel(x2, y2).sticky - 1
