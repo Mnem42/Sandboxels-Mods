@@ -1,7 +1,10 @@
 behaviors.GEL = function(pixel) {
-    doDefaults(pixel)
+    let x = pixel.x
+    let y = pixel.y
 
-    
+    tryMove(pixel, x, y+1)
+
+    doDefaults(pixel)
 }
 
 elements.gel = {
