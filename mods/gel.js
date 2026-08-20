@@ -16,8 +16,8 @@ let tryStick = function(pixel) {
 
     let sticky = 0
     for (const offset of offsets) {
-        x2 = offset[0]
-        y2 = offset[1]
+        x2 = x + offset[0]
+        y2 = y + offset[1]
 
         if (!canMove(pixel, x2, y2)) {
             if (getPixel(x2, y2) && getPixel(x2, y2).element !== element) {
