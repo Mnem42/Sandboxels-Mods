@@ -1,84 +1,57 @@
+let maxSticky = 5
+
+let tryStick = function(pixel) {
+    if (pixel === null) {return false}
+
+    let element = pixel.element
+    let x = pixel.x
+    let y = pixel.y
+
+    let offsets = [
+        [-1, 0],
+        [1, 0],
+        [0, -1],
+        [0, 1]
+    ]
+
+    let sticky = 0
+    for (const offset of offsets) {
+        x2 = x + offset[0]
+        y2 = y + offset[1]
+
+        if (getPixel(x2, y2) && !canMove(pixel, x2, y2)) {
+            if (getPixel(x2, y2).element !== element) {
+                let state = elements[getPixel(x2, y2).element].state
+                if (state === "liquid" || state === "gas") {
+                    continue
+                } else {
+                    sticky = maxSticky
+                }
+            } else if (getPixel(x2, y2).sticky && getPixel(x2, y2).sticky - 1 > sticky) {
+                sticky = getPixel(x2, y2).sticky - 1
+            }
+        }
+    }
+    pixel.sticky = sticky
+    return sticky > 0
+}
+
 behaviors.GEL = function(pixel) {
+    let x = pixel.x
+    let y = pixel.y
+
+    if (!tryStick(pixel)) {
+        if (!tryMove(pixel, x, y+1) && Math.random() > 0.5) {
+            if (Math.random() > 0.5) {
+                tryMove(pixel, x-1, y+1)
+            } else {
+                tryMove(pixel, x+1, y+1)
+            }
+            
+        }
+    }
+
     doDefaults(pixel)
-    pixel.sticky = true
-    let sticking = false
-
-    // -y
-    if ( !isEmpty(pixel.x, pixel.y-1) & getPixel(pixel.x, pixel.y-1) != null ) {
-        let stickPixel = getPixel(pixel.x, pixel.y-1)
-
-        if ( !stickPixel.sticky & elements[stickPixel.element].state != "gas" ) {
-            sticking = true
-            return
-        }
-    }
-
-    // -x
-    if ( !isEmpty(pixel.x-1, pixel.y) & getPixel(pixel.x-1, pixel.y) != null ) {
-        let stickPixel = getPixel(pixel.x-1, pixel.y)
-        let behindPixel = getPixel(pixel.x-2, pixel.y)
-
-        if ( !stickPixel.sticky & elements[stickPixel.element].state != "gas" ) {
-            sticking = true
-            tryMove(pixel, pixel.x-1, pixel.y+1)
-            return
-        } else if (behindPixel != null & stickPixel.sticky) {
-            if (!behindPixel.sticky & elements[behindPixel.element].state != "gas") {
-                //sticking = true
-                tryMove(pixel, pixel.x-1, pixel.y+1)
-            }
-        }
-    }
-    // +x
-    if ( !isEmpty(pixel.x+1, pixel.y) & getPixel(pixel.x+1, pixel.y) != null ) {
-        let stickPixel = getPixel(pixel.x+1, pixel.y)
-        let behindPixel = getPixel(pixel.x+2, pixel.y)
-
-        if ( !stickPixel.sticky & elements[stickPixel.element].state != "gas" ) {
-            sticking = true
-            tryMove(pixel, pixel.x+1, pixel.y+1)
-            return
-        } else if ( behindPixel != null & stickPixel.sticky ) {
-            if (!behindPixel.sticky & elements[behindPixel.element].state != "gas" ) {
-                //sticking = true
-                tryMove(pixel, pixel.x+1, pixel.y+1)
-            }
-        }
-    }
-
-
-
-
-    if ( !isEmpty(pixel.x, pixel.y+1) ) {
-        let stickPixel = getPixel(pixel.x, pixel.y+1)
-        if (stickPixel != null) {
-            if ( !stickPixel.sticky & elements[stickPixel.element].state != "gas" ) {
-                sticking = true
-            }
-        } else {
-            sticking = true
-        }
-    }
-
-    // normal fall
-    if (!tryMove(pixel, pixel.x, pixel.y+1) & Math.random() > 0.2 ) {
-        if (!tryMove(pixel, pixel.x+1, pixel.y+1)) {
-            tryMove(pixel, pixel.x-1, pixel.y+1)
-        }
-    } else {
-        return
-    }
-
-    // the umm wandering thing
-    if (Math.random() < 0.2) {
-        if (sticking) {return}
-
-        if (Math.random() > 0.5) {
-            tryMove(pixel, pixel.x+1, pixel.y)
-        } else {
-            tryMove(pixel, pixel.x-1, pixel.y)
-        }
-    }
 }
 
 elements.gel = {
