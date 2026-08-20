@@ -1,16 +1,41 @@
-let canStick = function(pixel, x, y) {
-    let element = pixel.element
+let maxSticky = 5
 
-    if (!canMove(pixel, x, y) && getPixel(x, y).element !== element) {
-        return true
+let tryStick = function(pixel) {
+    if (pixel === null) {return false}
+
+    let element = pixel.element
+    let x = pixel.x
+    let y = pixel.y
+
+    let offsets = [
+        [-1, 0],
+        [1, 0],
+        [0, -1],
+        [0, 1]
+    ]
+
+    let sticky = 0
+    for (const offset of offsets) {
+        x2 = offset[0]
+        y2 = offset[1]
+
+        if (!canMove(pixel, x2, y2)) {
+            if (getPixel(x2, y2).element !== element) {
+                sticky = maxSticky
+            } else if (getPixel(x2, y2).sticky && getPixel(x2, y2).sticky - 1 > sticky) {
+                sticky = getPixel(x2, y2).sticky - 1
+            }
+        }
     }
+    pixel.sticky = sticky
+    return sticky > 0
 }
 
 behaviors.GEL = function(pixel) {
     let x = pixel.x
     let y = pixel.y
 
-    if (!canStick(pixel, x-1, y) && !canStick(pixel, x+1, y) && !canStick(pixel, x, y-1)) {
+    if (!tryStick(pixel)) {
         if (!tryMove(pixel, x, y+1) && Math.random() > 0.5) {
             if (Math.random() > 0.5) {
                 tryMove(pixel, x-1, y+1)
