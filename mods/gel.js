@@ -2,7 +2,11 @@ behaviors.GEL = function(pixel) {
     let x = pixel.x
     let y = pixel.y
 
-    tryMove(pixel, x, y+1)
+    if (tryMove(pixel, x, y+1) !== true) {
+        console.log("cant move")
+    } else {
+        console.log(".")
+    }
 
     doDefaults(pixel)
 }
