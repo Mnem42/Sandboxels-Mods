@@ -2,7 +2,7 @@ behaviors.GEL = function(pixel) {
     let x = pixel.x
     let y = pixel.y
 
-    if (canMove(pixel, x-1, y) || canMove(pixel, x+1, y)) {
+    if (canMove(pixel, x-1, y) && canMove(pixel, x+1, y)) {
         tryMove(pixel, x, y+1)
     }
 
