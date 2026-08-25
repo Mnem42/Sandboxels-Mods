@@ -1,3 +1,4 @@
+(() => {
 // not brought to you by hyper co.
 
 // using a Symbol to make it impossible to accidentally overwrite something
@@ -83,3 +84,4 @@ window.loadSave = (data, confirmed, skip, softLoad) => {
 
 runAfterLoad(patch);
 
+})();
