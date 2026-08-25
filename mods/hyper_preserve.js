@@ -2,7 +2,7 @@
 
 // using a Symbol to make it impossible to accidentally overwrite something
 // another mod uses
-const tag_sym = Symbol("unregistered hypertag 2");
+const tag_sym = Symbol("Unregistered HyperTag 2");
 
 let hyper = localStorage.hyperpreserve_en == "true";
 
