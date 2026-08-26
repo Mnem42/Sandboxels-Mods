@@ -86,8 +86,10 @@ class StorageManager {
 
     add(...urls) {
         for (const url of urls) {
-            this.#loaded_esms.add(url)
-            this.#list.append(StorageManager.#create_li(url))
+            if (!this.#loaded_esms.has(url)) {
+                this.#loaded_esms.add(url)
+                this.#list.append(StorageManager.#create_li(url))
+            }
         }
 
         localStorage.ejs_loaded_esms = JSON.stringify(Array.from(this.#loaded_esms))
@@ -278,4 +280,16 @@ window.removeMod = (url, noMessage) => {
         }
     }
 }
+
+const gsave_old = window.generateSave
+window.generateSave = (pixmap, opts) => {
+    const generated = gsave_old(pixmap, opts);
+
+    if (opts.mods) {
+        generated.saveConfig.mods.push(...ls_manager.load())
+    }
+
+    return generated;
+}
+
 })()
