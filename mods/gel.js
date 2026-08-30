@@ -20,7 +20,7 @@ let tryStick = function(pixel) {
         y2 = y + offset[1]
 
         if (getPixel(x2, y2) && !canMove(pixel, x2, y2)) {
-            if (getPixel(x2, y2).element !== element) {
+            if (elements[getPixel(x2, y2).element].behavior !== elements[element].behavior) {
                 let state = elements[getPixel(x2, y2).element].state
                 if (state === "liquid" || state === "gas") {
                     continue
@@ -37,6 +37,12 @@ let tryStick = function(pixel) {
 }
 
 behaviors.GEL = function(pixel) {
+    if (pixel.start === pixelTicks) {return}
+	if (pixel.charge !== undefined && elements[pixel.element].behaviorOn !== undefined) {
+		pixelTick(pixel);
+		return;
+	}
+
     let x = pixel.x
     let y = pixel.y
 
@@ -53,6 +59,8 @@ behaviors.GEL = function(pixel) {
 
     doDefaults(pixel)
 }
+
+// normal gel
 
 elements.gel = {
     color: "#f7c472",
@@ -71,7 +79,7 @@ elements.gel = {
 elements.gel_ice = {
     color: "#fad38c",
     behavior: behaviors.WALL,
-    category: "solids",
+    category: "states",
     state: "solid",
     tempHigh: -95,
     stateHigh: "gel",
@@ -86,4 +94,39 @@ elements.gel_gas = {
     tempLow: 595,
     stateLow: "gel",
     density: 0.6,
+}
+
+// explosive gel
+
+elements.explosive_gel = {
+    color: "#fc0c30",
+    behavior: behaviors.GEL,
+    behaviorOn: [
+		"XX|XX|XX",
+		"XX|EX:10|XX",
+		"XX|XX|XX"
+	],
+    conduct: 1,
+	burn: 100,
+	burnTime: 1,
+	burnInto: "explosion",
+    category: "weapons",
+    state: "liquid",
+    tempHigh: 600,
+    stateHigh: "explosion",
+    tempLow: -100,
+    stateLow: "explosive_gel_ice",
+    density: 1450,
+    stain: 0.05,
+    viscosity: 5000,
+}
+
+elements.explosive_gel_ice = {
+    color: "#f94560",
+    behavior: behaviors.WALL,
+    category: "states",
+    state: "solid",
+    tempHigh: -95,
+    stateHigh: "explosive_gel",
+    density: 917,
 }
