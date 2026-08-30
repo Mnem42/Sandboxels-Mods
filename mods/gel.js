@@ -20,7 +20,7 @@ let tryStick = function(pixel) {
         y2 = y + offset[1]
 
         if (getPixel(x2, y2) && !canMove(pixel, x2, y2)) {
-            if (getPixel(x2, y2).element !== element) {
+            if (elements[getPixel(x2, y2).element].behavior !== elements[element].behavior) {
                 let state = elements[getPixel(x2, y2).element].state
                 if (state === "liquid" || state === "gas") {
                     continue
@@ -95,16 +95,21 @@ elements.gel_gas = {
 elements.explosive_gel = {
     color: "#fc0c30",
     behavior: behaviors.GEL,
+    behaviorOn: [
+		"XX|XX|XX",
+		"XX|EX:10|XX",
+		"XX|XX|XX"
+	],
+    conduct: 1,
+	burn: 100,
+	burnTime: 1,
+	burnInto: "explosion",
     category: "weapons",
     state: "liquid",
     tempHigh: 600,
     stateHigh: "explosion",
     tempLow: -100,
     stateLow: "explosive_gel_ice",
-    conduct: 1,
-	burn: 100,
-	burnTime: 1,
-	burnInto: "explosion",
     density: 1450,
     stain: 0.05,
     viscosity: 5000,
