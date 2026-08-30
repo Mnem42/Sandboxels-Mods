@@ -1208,6 +1208,10 @@ img {
     max-height: none;
     height: 70vh;
 
+    .menuTitle {
+        margin-top: 10px;
+    }
+
     .XButton {
         position: sticky;
         float: right;
@@ -1227,6 +1231,10 @@ img {
 .ojs_ch_header {
     font-family: "VT323";
     font-size: 2em;
+}
+
+#ojs_changelog {
+    padding-bottom: 2em;
 }
 
 #ojs_ch_list {
@@ -1318,6 +1326,11 @@ function parse_changelog(text) {
 
             changes = document.createElement("ul")
             changes.id = "ojs_ch_list"
+
+            // :P
+            if (vh_match[1] === "Public Release - Dec. 15, 2021") {
+                header.title = "where the boxels started sanding"
+            }
         }
         else if (subh_match = subheader_regex.exec(line)) {
             const header = document.createElement("h3")
@@ -1359,7 +1372,7 @@ runAfterLoad(() => {
         }
         promptState = {
             text: "",
-            title: "",
+            title: "Changelog",
             html: parse_changelog(text).outerHTML,
             type: "text",
             full: true,
@@ -1373,7 +1386,8 @@ runAfterLoad(() => {
 dependOn(
     "betterSettings.js", 
     () => {
-        document.querySelectorAll(`input[id^="betterSettings"],select[id^="betterSettings"]`)
+        document
+            .querySelectorAll(`input[id^="betterSettings"],select[id^="betterSettings"]`)
             .forEach(x => x.classList.add("settingsInput"))
     }
 )
