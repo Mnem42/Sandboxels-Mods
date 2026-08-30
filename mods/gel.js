@@ -37,6 +37,12 @@ let tryStick = function(pixel) {
 }
 
 behaviors.GEL = function(pixel) {
+    if (pixel.start === pixelTicks) {return}
+	if (pixel.charge !== undefined && elements[pixel.element].behaviorOn !== undefined) {
+		pixelTick(pixel);
+		return;
+	}
+
     let x = pixel.x
     let y = pixel.y
 
