@@ -12,25 +12,34 @@ function patch() {
         .insertAdjacentHTML(
             "afterend",
             `<span
-                setting="hyperpreserve"
+                setting="save_hyper"
                 class="setting-span multisetting"
                 title="Default: OFF"
             >
                 <button
-                    id="settingLabel-hyperpreserve"
+                    id="settingLabel-save_hyper"
                     class="toggleInput"
+                    onclick="toggleInput(this, 'save_hyper', false)"
                     state="0"
                 >
-                    Keep hyper
+                    Save hyper
+                </button>
+            </span>
+            <span
+                setting="load_hyper"
+                class="setting-span multisetting"
+                title="Default: OFF"
+            >
+                <button
+                    id="settingLabel-load_hyper"
+                    class="toggleInput"
+                    onclick = "toggleInput(this, 'load_hyper', false)"
+                    state="0"
+                >
+                    Load hyper
                 </button>
             </span>`,
         );
-
-    // function() is needed to bind `this`
-    document.getElementById("settingLabel-hyperpreserve").onclick =
-        function () {
-            toggleInput(this, "hyperpreserve", false);
-        };
 }
 
 function isolate_hyper(pixmap) {
@@ -70,7 +79,7 @@ window.loadSave = (data, confirmed, skip, softLoad) => {
     lsave_old(data, confirmed, skip, softLoad)
 
     console.log(data.hyper)
-    if (data.hyper) {
+    if (data.hyper && settings.load_hyper) {
         currentPixels.push(...data.hyper)
     }
 }
