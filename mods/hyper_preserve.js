@@ -5,8 +5,6 @@
 // another mod uses
 const tag_sym = Symbol("Unregistered HyperTag 2");
 
-let hyper = localStorage.hyperpreserve_en == "true";
-
 function patch() {
     document
         .getElementById("settingLabel-limitless")
@@ -14,7 +12,7 @@ function patch() {
         .insertAdjacentHTML(
             "afterend",
             `<span
-                setting="limitless"
+                setting="hyperpreserve"
                 class="setting-span multisetting"
                 title="Default: OFF"
             >
@@ -31,12 +29,7 @@ function patch() {
     // function() is needed to bind `this`
     document.getElementById("settingLabel-hyperpreserve").onclick =
         function () {
-            hyper = !hyper;
-
-            // ternary to be a bit more explicit
-            localStorage.hyperpreserve_en = hyper ? "true" : "false";
-
-            toggleInput(this, "limitless", false);
+            toggleInput(this, "hyperpreserve", false);
         };
 }
 
@@ -65,7 +58,7 @@ const gsave_old = generateSave;
 window.generateSave = (pixmap, opts) => {
     const generated = gsave_old(pixmap, opts);
 
-    if (hyper) {
+    if (settings.hyperpreserve) {
         generated.hyper = isolate_hyper(pixmap ?? pixelMap);
     }
 
