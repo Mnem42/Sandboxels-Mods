@@ -78,7 +78,6 @@ const lsave_old = loadSave;
 window.loadSave = (data, confirmed, skip, softLoad) => {
     lsave_old(data, confirmed, skip, softLoad)
 
-    console.log(data.hyper)
     if (data.hyper && settings.load_hyper) {
         currentPixels.push(...data.hyper)
     }
