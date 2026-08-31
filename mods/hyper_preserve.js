@@ -8,7 +8,7 @@ const tag_sym = Symbol("Unregistered HyperTag 2");
 let hyper = localStorage.hyperpreserve_en == "true";
 
 function patch() {
-    const parent = document
+    document
         .getElementById("settingLabel-limitless")
         .parentNode
         .insertAdjacentHTML(
