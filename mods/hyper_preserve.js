@@ -48,7 +48,7 @@
                 `<span>
                 <input
                     type="button"
-                    value="Save hyperboxels"
+                    value="Save hyper"
                     class="toggleInput"
                     onclick="toggleInput(this,undefined,false)"
                     state="0"
