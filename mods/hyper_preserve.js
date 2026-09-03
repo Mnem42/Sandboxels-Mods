@@ -165,7 +165,6 @@
             config.tags.push(parseInt(tagElem.getAttribute("data-tag")));
         });
 
-        console.log(config);
         if (standaloneType === "steam") {
             if (savingState.overwrite) {
                 overwriteSaveFileConfirm(
