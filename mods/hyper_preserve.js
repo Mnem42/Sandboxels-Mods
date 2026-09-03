@@ -80,6 +80,39 @@
         return hyper;
     }
 
+    const gsave_old = generateSave;
+    window.generateSave = (pixmap, opts) => {
+        const generated = gsave_old(pixmap, opts);
+
+        if (settings.hyperpreserve || opts.save_hyper) {
+            generated.hyper = isolate_hyper(pixmap ?? pixelMap);
+        }
+
+        return generated;
+    };
+
+    const lsave_old = loadSave;
+    window.loadSave = (data, confirmed, skip, softLoad) => {
+        lsave_old(data, confirmed, skip, softLoad);
+
+        if (data.hyper && settings.load_hyper) {
+            currentPixels.push(...data.hyper);
+        }
+    };
+
+    runAfterLoad(patch);
+
+    // patches for the saves prompt
+
+    const ssp_old = showSavePrompt;
+    window.showSavePrompt = () => {
+        document
+            .getElementById("saveHyper")
+            .setAttribute("state", settings.save_hyper);
+
+        ssp_old();
+    };
+
     window.confirmSave = (confirmed = 0) => {
         if (!savingState) return;
         if (
@@ -180,35 +213,4 @@
             currentSaveData.desc = saveDesc;
         }
     };
-
-    const ssp_old = showSavePrompt;
-    window.showSavePrompt = () => {
-        document
-            .getElementById("saveHyper")
-            .setAttribute("state", settings.save_hyper);
-
-        ssp_old();
-    };
-
-    const gsave_old = generateSave;
-    window.generateSave = (pixmap, opts) => {
-        const generated = gsave_old(pixmap, opts);
-
-        if (settings.hyperpreserve || opts.save_hyper) {
-            generated.hyper = isolate_hyper(pixmap ?? pixelMap);
-        }
-
-        return generated;
-    };
-
-    const lsave_old = loadSave;
-    window.loadSave = (data, confirmed, skip, softLoad) => {
-        lsave_old(data, confirmed, skip, softLoad);
-
-        if (data.hyper && settings.load_hyper) {
-            currentPixels.push(...data.hyper);
-        }
-    };
-
-    runAfterLoad(patch);
 })();
