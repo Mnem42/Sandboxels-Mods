@@ -1203,6 +1203,10 @@ img {
 `
 
 const OJS_STYLE = `
+#infoText {
+    margin-bottom: 70px;
+}
+
 #promptParent:has(#ojs_changelog) {
     max-height: none;
     height: 70vh;
@@ -1275,9 +1279,9 @@ const OJS_STYLE = `
 }
 
 
-#offline-tab {
-    margin-left: 0.25em;
-    margin-right: 0.25em;
+.offline-tab {
+    margin-left: 0.5em;
+    margin-right: 0.55em;
 }
 
 .ojs_infobtn {
